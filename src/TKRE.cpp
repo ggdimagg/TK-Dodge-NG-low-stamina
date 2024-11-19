@@ -92,7 +92,7 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 
 	return a_pc->GetGraphVariableBool("bIsDodging", bIsDodging) && !bIsDodging && ((attackState == RE::ATTACK_STATE_ENUM::kNone) || Settings::enableDodgeAttackCancel) && (!playerState->IsSprinting() || !Settings::EnableSprintKeyDodge) && (controlMap->IsMovementControlsEnabled() && controlMap->IsFightingControlsEnabled()) &&
 	       (!playerState->IsSneaking() || Settings::enableSneakDodge) && playerControls && playerControls->attackBlockHandler && playerControls->attackBlockHandler->inputEventHandlingEnabled && playerControls->movementHandler &&
-	       playerControls->movementHandler->inputEventHandlingEnabled && (playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && !playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && (a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= Settings::dodgeStamina);
+	       playerControls->movementHandler->inputEventHandlingEnabled && (playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && !playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && (a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= 1.0f);
 }
 
 void TKRE::dodge()
@@ -118,7 +118,8 @@ void TKRE::applyDodgeCost()
 {
 	auto pc = RE::PlayerCharacter::GetSingleton();
 	if (pc && !pc->IsGodMode()) {
-		pc->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, -Settings::dodgeStamina);
+		float CurrentStamina = pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
+		pc->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, -((CurrentStamina < Settings::dodgeStamina) ? CurrentStamina : Settings::dodgeStamina));
 	}
 }
 
