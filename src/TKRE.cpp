@@ -99,7 +99,7 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 	        playerControls->movementHandler->inputEventHandlingEnabled && 
 		(playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && 
 		!playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && 
-		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (EnableLowStamina ? MinStamina : dodgeStamina));
+		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (Settings::EnableLowStamina ? Settings::MinStamina : dodgeStamina));
 }
 
 void TKRE::dodge()
@@ -127,7 +127,7 @@ void TKRE::applyDodgeCost()
 	if (pc && !pc->IsGodMode()) {
 		float CurrentStamina = pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
 		pc->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina,
-		 -((EnableLowStamina && CurrentStamina < Settings::dodgeStamina) ? CurrentStamina : Settings::dodgeStamina)); // Not sure how the game handles negative stamina 
+		 -((Settings::EnableLowStamina && CurrentStamina < Settings::dodgeStamina) ? CurrentStamina : Settings::dodgeStamina)); // Not sure how the game handles negative stamina 
 	}
 }
 
