@@ -193,6 +193,11 @@ void Settings::readSettings()
 	{
 		MinStamina = 0.f;
 	}
+// Not sure about the need for tests for weird values
+	if (MinStamina >= dodgeStamina)
+	{
+		EnableLowStamina = false;
+	}
 	INFO("Step dodge: %d", stepDodge);
 	INFO("...done");
 }
