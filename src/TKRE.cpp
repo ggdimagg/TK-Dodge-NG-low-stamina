@@ -99,7 +99,7 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 	        playerControls->movementHandler->inputEventHandlingEnabled && 
 		(playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && 
 		!playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && 
-		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (Settings::EnableLowStamina ? Settings::MinStamina : dodgeStamina));
+		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (Settings::EnableLowStamina ? Settings::MinStamina : Settings::dodgeStamina));
 }
 
 void TKRE::dodge()
