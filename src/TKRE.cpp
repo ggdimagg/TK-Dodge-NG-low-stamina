@@ -90,9 +90,16 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 	const auto playerState = a_pc->AsActorState();
 	auto attackState = playerState->GetAttackState();
 
-	return a_pc->GetGraphVariableBool("bIsDodging", bIsDodging) && !bIsDodging && ((attackState == RE::ATTACK_STATE_ENUM::kNone) || Settings::enableDodgeAttackCancel) && (!playerState->IsSprinting() || !Settings::EnableSprintKeyDodge) && (controlMap->IsMovementControlsEnabled() && controlMap->IsFightingControlsEnabled()) &&
-	       (!playerState->IsSneaking() || Settings::enableSneakDodge) && playerControls && playerControls->attackBlockHandler && playerControls->attackBlockHandler->inputEventHandlingEnabled && playerControls->movementHandler &&
-	       playerControls->movementHandler->inputEventHandlingEnabled && (playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && !playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && (a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= 1.0f);
+	return a_pc->GetGraphVariableBool("bIsDodging", bIsDodging) && !bIsDodging && 
+		((attackState == RE::ATTACK_STATE_ENUM::kNone) || Settings::enableDodgeAttackCancel) && 
+		(!playerState->IsSprinting() || !Settings::EnableSprintKeyDodge) && 
+		(controlMap->IsMovementControlsEnabled() && controlMap->IsFightingControlsEnabled()) &&
+	        (!playerState->IsSneaking() || Settings::enableSneakDodge) && playerControls && 
+		playerControls->attackBlockHandler && playerControls->attackBlockHandler->inputEventHandlingEnabled && playerControls->movementHandler &&
+	        playerControls->movementHandler->inputEventHandlingEnabled && 
+		(playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && 
+		!playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && 
+		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (EnableLowStamina ? MinimumStamina : dodgeStamina));
 }
 
 void TKRE::dodge()
@@ -119,7 +126,8 @@ void TKRE::applyDodgeCost()
 	auto pc = RE::PlayerCharacter::GetSingleton();
 	if (pc && !pc->IsGodMode()) {
 		float CurrentStamina = pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
-		pc->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, -((CurrentStamina < Settings::dodgeStamina) ? CurrentStamina : Settings::dodgeStamina));
+		pc->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina,
+		 -((EnableLowStamina && CurrentStamina < Settings::dodgeStamina) ? CurrentStamina : Settings::dodgeStamina)); // Not sure how the game handles negative stamina 
 	}
 }
 
@@ -176,6 +184,14 @@ void Settings::readSettings()
 	if (ini.GetBoolValue("Main", "EnableDebugLog")) {
 		spdlog::set_level(spdlog::level::debug);
 		DEBUG("Debug log enabled");
+	}
+	ReadBoolSetting(ini, "Main", "EnableLowStamina", EnableLowStamina);
+	ReadFloatSetting(ini, "Main", "MinimumStamina", MinimumStamina);
+
+// Not sure how the game handles negative stamina
+	if (MinimumStamina < 0.f)
+	{
+		MinimumStamina = 0.f;
 	}
 	INFO("Step dodge: %d", stepDodge);
 	INFO("...done");

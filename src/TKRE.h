@@ -39,6 +39,8 @@ public:
 	static inline std::string defaultDodgeEvent = "TKDodgeBack";
 	static inline float SprintingPressDuration = 0.3f;
 	static inline float SneakingPressDuration = 0.3f;
+	static inline bool EnableLowStamina = false;
+	static inline float MinimumStamina = 1.f;
 	static void readSettings();
 
 private:
