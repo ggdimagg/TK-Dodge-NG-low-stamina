@@ -99,7 +99,7 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 	        playerControls->movementHandler->inputEventHandlingEnabled && 
 		(playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && 
 		!playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && 
-		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (EnableLowStamina ? MinimumStamina : dodgeStamina));
+		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (EnableLowStamina ? MinStamina : dodgeStamina));
 }
 
 void TKRE::dodge()
@@ -186,12 +186,12 @@ void Settings::readSettings()
 		DEBUG("Debug log enabled");
 	}
 	ReadBoolSetting(ini, "Main", "EnableLowStamina", EnableLowStamina);
-	ReadFloatSetting(ini, "Main", "MinimumStamina", MinimumStamina);
+	ReadFloatSetting(ini, "Main", "MinStamina", MinStamina);
 
 // Not sure how the game handles negative stamina
-	if (MinimumStamina < 0.f)
+	if (MinStamina < 0.f)
 	{
-		MinimumStamina = 0.f;
+		MinStamina = 0.f;
 	}
 	INFO("Step dodge: %d", stepDodge);
 	INFO("...done");
