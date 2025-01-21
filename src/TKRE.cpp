@@ -1,5 +1,4 @@
 #include "TKRE.h"
-#include <string>
 #include <DKUtil/Logger.hpp>
 
 #define SETTINGFILE_PATH "Data\\SKSE\\Plugins\\TK Dodge RE.ini"
