@@ -1,4 +1,5 @@
 #include "TKRE.h"
+#include <string>
 #include <DKUtil/Logger.hpp>
 
 #define SETTINGFILE_PATH "Data\\SKSE\\Plugins\\TK Dodge RE.ini"
@@ -90,6 +91,13 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 	const auto playerState = a_pc->AsActorState();
 	auto attackState = playerState->GetAttackState();
 
+	float StaminaCost = Settings::dodgeStamina;
+	if (Settings::WeightFactor != 0.f)
+	{ 
+		StaminaCost = Settings::dodgeStamina + Settings::WeightFactor * a_pc->GetEquippedWeight();
+	}
+	
+
 	return a_pc->GetGraphVariableBool("bIsDodging", bIsDodging) && !bIsDodging && 
 		((attackState == RE::ATTACK_STATE_ENUM::kNone) || Settings::enableDodgeAttackCancel) && 
 		(!playerState->IsSprinting() || !Settings::EnableSprintKeyDodge) && 
@@ -99,7 +107,7 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 	        playerControls->movementHandler->inputEventHandlingEnabled && 
 		(playerState->GetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal && playerState->GetKnockState() == RE::KNOCK_STATE_ENUM::kNormal && playerState->GetFlyState() == RE::FLY_STATE::kNone) && 
 		!playerState->IsSwimming() && !isJumping(a_pc) && !a_pc->IsInKillMove() && 
-		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (EnableLowStamina ? MinStamina : dodgeStamina));
+		(a_pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= (Settings::EnableLowStamina ? Settings::MinStamina : StaminaCost));
 }
 
 void TKRE::dodge()
@@ -118,17 +126,26 @@ void TKRE::dodge()
 		pc->SetGraphVariableInt("iStep", 2);
 	}
 	pc->SetGraphVariableFloat("TKDR_IframeDuration", Settings::iFrameDuration);  //Set invulnerable frame duration
+
 	pc->NotifyAnimationGraph(dodge_event);                                       //Send TK Dodge Event
+
 }
 
 void TKRE::applyDodgeCost()
 {
 	auto pc = RE::PlayerCharacter::GetSingleton();
-	if (pc && !pc->IsGodMode()) {
+	if (pc && !pc->IsGodMode()) 
+	{
+		float StaminaCost = Settings::dodgeStamina;
+		if (Settings::WeightFactor != 0.f)
+		{ 
+			StaminaCost = Settings::dodgeStamina + Settings::WeightFactor * pc->GetEquippedWeight();
+		}
 		float CurrentStamina = pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
 		pc->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina,
-		 -((EnableLowStamina && CurrentStamina < Settings::dodgeStamina) ? CurrentStamina : Settings::dodgeStamina)); // Not sure how the game handles negative stamina 
+		 -((Settings::EnableLowStamina && CurrentStamina < StaminaCost) ? CurrentStamina : StaminaCost)); // Not sure how the game handles negative stamina 
 	}
+
 }
 
 void Settings::ReadIntSetting(CSimpleIniA& a_ini, const char* a_sectionName, const char* a_settingName, uint32_t& a_setting)
@@ -185,6 +202,7 @@ void Settings::readSettings()
 		spdlog::set_level(spdlog::level::debug);
 		DEBUG("Debug log enabled");
 	}
+	ReadFloatSetting(ini, "Main", "WeightFactor", WeightFactor);
 	ReadBoolSetting(ini, "Main", "EnableLowStamina", EnableLowStamina);
 	ReadFloatSetting(ini, "Main", "MinStamina", MinStamina);
 
