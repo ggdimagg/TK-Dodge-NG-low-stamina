@@ -91,11 +91,7 @@ inline bool canDodge(RE::PlayerCharacter* a_pc)
 	auto attackState = playerState->GetAttackState();
 
 	float StaminaCost = Settings::dodgeStamina;
-	if (Settings::WeightFactor != 0.f)
-	{ 
-		StaminaCost = Settings::dodgeStamina + Settings::WeightFactor * a_pc->GetEquippedWeight();
-	}
-	
+	StaminaCost += Settings::WeightFactor * a_pc->GetEquippedWeight();
 
 	return a_pc->GetGraphVariableBool("bIsDodging", bIsDodging) && !bIsDodging && 
 		((attackState == RE::ATTACK_STATE_ENUM::kNone) || Settings::enableDodgeAttackCancel) && 
@@ -136,10 +132,7 @@ void TKRE::applyDodgeCost()
 	if (pc && !pc->IsGodMode()) 
 	{
 		float StaminaCost = Settings::dodgeStamina;
-		if (Settings::WeightFactor != 0.f)
-		{ 
-			StaminaCost = Settings::dodgeStamina + Settings::WeightFactor * pc->GetEquippedWeight();
-		}
+		StaminaCost += Settings::WeightFactor * pc->GetEquippedWeight();
 		float CurrentStamina = pc->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
 		pc->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina,
 		 -((Settings::EnableLowStamina && CurrentStamina < StaminaCost) ? CurrentStamina : StaminaCost)); // Not sure how the game handles negative stamina 
